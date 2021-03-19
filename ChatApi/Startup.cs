@@ -33,6 +33,9 @@ namespace ChatApi
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
+        
+        
+        readonly string AngularCorsPolicy = "_AngularCorsPolicy";
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
@@ -56,6 +59,14 @@ namespace ChatApi
             services.AddDbContext<AppIdentityDbContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("IdentityConnection"));
+            });
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy(name: AngularCorsPolicy, builder =>
+                {
+                    builder.WithOrigins("http://localhost:4200").AllowAnyHeader().AllowAnyMethod();
+                });
             });
             
             //Adding my Identity Service extension
@@ -82,6 +93,8 @@ namespace ChatApi
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseCors(AngularCorsPolicy);
 
             app.UseAuthorization();
 
